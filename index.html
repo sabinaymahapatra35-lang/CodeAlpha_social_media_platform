@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vibe — Mini Social Media</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✨</text></svg>">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- =============================================
+     AUTH SECTION (Login / Register)
+============================================= -->
+<section id="auth-section" class="auth-page">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <h1>✨ Vibe</h1>
+      <p>Your corner of the internet</p>
+    </div>
+
+    <!-- Tab Switch -->
+    <div class="auth-tab-bar">
+      <button class="auth-tab active" onclick="switchAuthTab('login')">Sign In</button>
+      <button class="auth-tab" onclick="switchAuthTab('register')">Create Account</button>
+    </div>
+
+    <!-- Login Form -->
+    <form id="auth-login-form" onsubmit="handleLogin(event)">
+      <div class="form-group">
+        <label>Email</label>
+        <input id="login-email" type="email" placeholder="you@example.com" required autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input id="login-password" type="password" placeholder="Your password" required autocomplete="current-password">
+      </div>
+      <button id="login-btn" type="submit" class="btn btn-primary">Sign In</button>
+    </form>
+
+    <!-- Register Form -->
+    <form id="auth-register-form" style="display:none" onsubmit="handleRegister(event)">
+      <div class="form-group">
+        <label>Full Name</label>
+        <input id="reg-name" type="text" placeholder="Ada Lovelace" required minlength="2">
+      </div>
+      <div class="form-group">
+        <label>Username</label>
+        <input id="reg-username" type="text" placeholder="ada_lovelace" required minlength="3" maxlength="20"
+          pattern="[a-zA-Z0-9_]+" title="Only letters, numbers, and underscores">
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input id="reg-email" type="email" placeholder="you@example.com" required autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input id="reg-password" type="password" placeholder="At least 6 characters" required minlength="6" autocomplete="new-password">
+      </div>
+      <button id="register-btn" type="submit" class="btn btn-primary">Create Account</button>
+    </form>
+
+    <p style="text-align:center;color:var(--text3);font-size:0.8rem;margin-top:20px">
+      By joining, you agree to have a great time ✨
+    </p>
+  </div>
+</section>
+
+
+<!-- =============================================
+     APP SHELL
+============================================= -->
+<div id="app">
+  <div class="app-layout">
+
+    <!-- ── Left Sidebar ──────────────────────── -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-logo">✨ Vibe</div>
+
+      <button class="nav-item active" data-page="feed" onclick="navigateTo('feed')">
+        <span class="nav-icon">🏠</span>
+        <span>Home</span>
+      </button>
+
+      <button class="nav-item" data-page="search" onclick="navigateTo('search')">
+        <span class="nav-icon">🔍</span>
+        <span>Search</span>
+      </button>
+
+      <button class="nav-item" data-page="notifications" id="nav-notifs" onclick="navigateTo('notifications')">
+        <span class="nav-icon">🔔</span>
+        <span>Notifications</span>
+      </button>
+
+      <button class="nav-item" data-page="profile" onclick="navigateTo('profile',{profileUserId:State.currentUser._id})">
+        <span class="nav-icon">👤</span>
+        <span>Profile</span>
+      </button>
+
+      <button class="nav-item" onclick="openOnboarding()" title="Help & Guide">
+        <span class="nav-icon">❓</span>
+        <span>Guide</span>
+      </button>
+
+      <!-- User card at bottom -->
+      <button class="sidebar-user" onclick="navigateTo('profile',{profileUserId:State.currentUser._id})">
+        <img id="sidebar-user-img" src="" alt="You">
+        <div class="sidebar-user-info">
+          <div class="sidebar-user-name" id="sidebar-user-name">Loading…</div>
+          <div class="sidebar-user-handle" id="sidebar-user-handle">@…</div>
+        </div>
+        <span style="font-size:1rem;color:var(--text3)" onclick="event.stopPropagation();handleLogout()" title="Sign out">⏏</span>
+      </button>
+    </aside>
+
+    <!-- ── Main Feed ──────────────────────────── -->
+    <main class="main-content" id="main-content">
+      <div class="spinner"></div>
+    </main>
+
+    <!-- ── Right Panel ────────────────────────── -->
+    <aside class="right-panel" id="right-panel">
+      <!-- Searchbox -->
+      <div class="search-bar" style="position:relative;margin-bottom:16px">
+        <span class="search-icon">🔍</span>
+        <input type="text" placeholder="Quick search…" oninput="quickSearch(this.value)" id="rp-search">
+        <div id="rp-search-results" class="search-results" style="display:none"></div>
+      </div>
+
+      <!-- Who to follow -->
+      <div class="panel-card">
+        <h3>Who to follow</h3>
+        <div class="suggestions-list">
+          <div class="spinner" style="width:24px;height:24px;border-width:2px;margin:8px auto"></div>
+        </div>
+      </div>
+
+      <!-- App info -->
+      <div class="panel-card">
+        <h3>About Vibe</h3>
+        <p style="color:var(--text2);font-size:0.83rem;line-height:1.7">
+          A cozy social platform. Post, like, comment, follow, and discover awesome people. 🌟
+        </p>
+        <p style="color:var(--text3);font-size:0.78rem;margin-top:10px">
+          Built with Node.js · Express · MongoDB
+        </p>
+      </div>
+    </aside>
+
+  </div><!-- end .app-layout -->
+</div><!-- end #app -->
+
+
+<!-- =============================================
+     MODALS
+============================================= -->
+
+<!-- Edit Profile Modal -->
+<div class="modal-overlay" id="edit-profile-modal">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <div class="modal-title">Edit Profile</div>
+      <button class="modal-close" onclick="closeEditProfile()">✕</button>
+    </div>
+
+    <div class="avatar-upload">
+      <img id="edit-avatar-preview" src="" alt="avatar">
+      <div>
+        <label for="edit-pic-input" class="btn btn-secondary btn-sm" style="cursor:pointer">
+          📷 Change Photo
+        </label>
+        <input type="file" id="edit-pic-input" accept="image/*" style="display:none"
+          onchange="previewAvatarUpload(this)">
+        <p style="color:var(--text3);font-size:0.78rem;margin-top:6px">Max 5MB · JPG/PNG/GIF</p>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Display Name</label>
+      <input id="edit-name" type="text" placeholder="Your name" maxlength="50">
+    </div>
+
+    <div class="form-group">
+      <label>Bio</label>
+      <textarea id="edit-bio" placeholder="Tell the world about yourself…" maxlength="200" rows="3"></textarea>
+    </div>
+
+    <div style="display:flex;gap:10px;margin-top:4px">
+      <button class="btn btn-primary" style="flex:1" onclick="saveProfile()">Save Changes</button>
+      <button class="btn btn-secondary" onclick="closeEditProfile()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Follow List Modal -->
+<div class="modal-overlay" id="follow-list-modal" onclick="closeFollowModal()">
+  <div class="modal" onclick="event.stopPropagation()" style="max-height:80vh;overflow-y:auto">
+    <div class="modal-header">
+      <div class="modal-title" id="follow-list-title">Followers</div>
+      <button class="modal-close" onclick="closeFollowModal()">✕</button>
+    </div>
+    <div id="follow-list-content"></div>
+  </div>
+</div>
+
+<!-- Image Lightbox -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+  <img src="" alt="Full size image">
+</div>
+
+<!-- Onboarding Overlay -->
+<div class="onboard-overlay" id="onboard-overlay">
+  <div class="onboard-card">
+    <div id="onboard-dots" class="onboard-steps"></div>
+    <div class="onboard-icon" id="onboard-icon">👋</div>
+    <div class="onboard-title" id="onboard-title">Welcome!</div>
+    <div class="onboard-desc" id="onboard-desc"></div>
+    <div class="onboard-nav">
+      <button id="onboard-prev" class="btn btn-ghost btn-sm" onclick="onboardPrev()">← Back</button>
+      <button class="btn btn-ghost btn-sm" onclick="closeOnboarding()">Skip</button>
+      <button id="onboard-next" class="btn btn-primary btn-sm" onclick="onboardNext()">Next →</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- =============================================
+     SCRIPTS
+============================================= -->
+<script src="js/api.js"></script>
+<script src="js/app.js"></script>
+
+<script>
+// ── Right panel quick search ──────────────────
+let rpSearchTimer;
+async function quickSearch(q) {
+  const results = document.getElementById('rp-search-results');
+  clearTimeout(rpSearchTimer);
+
+  if (!q.trim()) { results.style.display = 'none'; return; }
+
+  rpSearchTimer = setTimeout(async () => {
+    try {
+      const data = await Users.search(q);
+      if (!data.users.length) { results.style.display = 'none'; return; }
+
+      results.style.display = 'block';
+      results.innerHTML = data.users.map(u => `
+        <div class="search-result-item" onclick="closeRpSearch();viewProfile('${u._id}')">
+          <img src="${getAvatar(u)}" alt="${u.name}">
+          <div>
+            <div class="search-result-name">${u.name}</div>
+            <div class="search-result-handle">@${u.username}</div>
+          </div>
+        </div>`).join('');
+    } catch {}
+  }, 300);
+}
+
+function closeRpSearch() {
+  document.getElementById('rp-search-results').style.display = 'none';
+  document.getElementById('rp-search').value = '';
+}
+
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.search-bar')) closeRpSearch();
+});
+
+// ── Load right panel suggestions after app loads ──
+const _origShowApp = showApp;
+window.showApp = function() {
+  _origShowApp();
+  setTimeout(() => renderRightPanel(), 1000);
+};
+</script>
+
+</body>
+</html>
